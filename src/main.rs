@@ -1,17 +1,19 @@
 use cursive::Cursive;
-use cursive::views::{Button, Dialog};
+use cursive::views::{Button, Dialog, TextContent};
 
 struct Data {
-    counter: u8,
+    counter: i32,
 }
 
 fn main() {
     let mut siv = cursive::default();
     let theme = cursive::theme::Theme::terminal_default();
     siv.set_theme(theme);
+    let my_data = Data { counter: 0 };
+    siv.set_user_data(my_data);
 
     my_list(&mut siv);
-    // list_view(&mut siv);
+    //list_view(&mut siv);
 
     //siv.add_layer(Dialog::text("This is a bunch of text")
     //    .title("My Title").button("Quit", |siv| show_next(siv)));
@@ -58,9 +60,55 @@ fn my_list(siv: &mut Cursive) {
             .content(
                 ListView::new()
                     .child("Activity #1", Button::new("thing", |s| my_activity(s)))
-                    .child("Activity #2", Button::new("thing", |s| my_activity(s))),
+                    .child("Activity #2", Button::new("thing", |s| my_activity(s)))
+                    .child("Counter", Button::new("yis", |s| counter(s))),
             ),
     )
+}
+
+fn counter(siv: &mut Cursive) {
+    // s.pop_layer();
+
+    /*     siv.add_layer(
+        Dialog::text("This uses some user data!")
+            .title("User data example")
+            .button("Increment", |s| {
+                // `Cursive::with_user_data()` is an easy way to run a closure
+                // on the data.
+                s.with_user_data(|data: &mut Data| {
+                    data.counter += 1;
+                });
+            })
+            .button("Show", |s| {
+                // `Cursive::user_data()` returns a reference to the data.
+                let value = s.user_data::<Data>().unwrap().counter;
+                s.add_layer(Dialog::info(format!("Current value: {value}")));
+            })
+            .button("Quit", Cursive::quit),
+    ); */
+    let content = TextContent::new("content");
+    let c2 = content.clone();
+    let view = TextView::new_with_content(content.clone());
+    siv.add_layer(
+        Dialog::text("Let's get some user data")
+            .content(view)
+            .title("Counter")
+            .button("Up!", move |s| {
+                s.with_user_data(|data: &mut Data| {
+                    data.counter += 1;
+                    c2.set_content(data.counter.to_string());
+                });
+            })
+            .button("Down!", move |s| {
+                s.with_user_data(|data: &mut Data| {
+                    data.counter -= 1;
+                    content.set_content(data.counter.to_string());
+                });
+            })
+            .button("Quit", |s| {
+                s.pop_layer();
+            }),
+    );
 }
 
 fn my_activity(s: &mut Cursive) {
