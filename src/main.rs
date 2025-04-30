@@ -1,5 +1,6 @@
 use cursive::Cursive;
-use cursive::views::{Button, Dialog, TextContent};
+use cursive::event::Key;
+use cursive::views::{Button, Dialog, ResizedView, TextContent};
 
 struct Data {
     counter: i32,
@@ -11,9 +12,10 @@ fn main() {
     siv.set_theme(theme);
     let my_data = Data { counter: 0 };
     siv.set_user_data(my_data);
+    siv.add_global_callback(Key::Esc, |s| s.quit());
 
     my_list(&mut siv);
-    //list_view(&mut siv);
+    // list_view(&mut siv);
 
     //siv.add_layer(Dialog::text("This is a bunch of text")
     //    .title("My Title").button("Quit", |siv| show_next(siv)));
@@ -52,18 +54,21 @@ fn show_answer(s: &mut Cursive, msg: &str) {
         .button("Finish", |s| s.quit()));
 } */
 
+use cursive::view::SizeConstraint;
 fn my_list(siv: &mut Cursive) {
-    siv.add_layer(
-        Dialog::new()
-            .title("To-Do List")
-            .button("Ok", |s| s.quit())
-            .content(
-                ListView::new()
-                    .child("Activity #1", Button::new("thing", |s| my_activity(s)))
-                    .child("Activity #2", Button::new("thing", |s| my_activity(s)))
-                    .child("Counter", Button::new("yis", |s| counter(s))),
-            ),
-    )
+    let dialog = Dialog::new()
+        .title("To-Do List")
+        .button("Ok", |s| s.quit())
+        .button("Refresh", |s| s.noop())
+        .content(
+            ListView::new()
+                .child("Activity #1", Button::new("thing", |s| my_activity(s)))
+                .child("Activity #2", Button::new("thing", |s| my_activity(s)))
+                .child("Counter", Button::new("yis", |s| counter(s))),
+        );
+    let rs = ResizedView::new(SizeConstraint::Full, SizeConstraint::Full, dialog);
+
+    siv.add_layer(rs);
 }
 
 fn counter(siv: &mut Cursive) {
@@ -104,6 +109,9 @@ fn counter(siv: &mut Cursive) {
                     data.counter -= 1;
                     content.set_content(data.counter.to_string());
                 });
+            })
+            .button("Print!", |s| {
+                println!("Thing!");
             })
             .button("Quit", |s| {
                 s.pop_layer();
