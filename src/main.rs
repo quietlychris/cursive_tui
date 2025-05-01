@@ -56,39 +56,43 @@ fn counter(siv: &mut Cursive) {
     let content = TextContent::new("content");
     let c2 = content.clone();
     let view = TextView::new_with_content(content.clone());
-    siv.add_layer(
-        Dialog::text("Let's get some user data")
-            .content(view)
-            .title("Counter")
-            .button("Up!", move |s| {
-                s.with_user_data(|data: &mut Data| {
-                    data.counter += 1;
-                    c2.set_content(data.counter.to_string());
-                });
-            })
-            .button("Down!", move |s| {
-                s.with_user_data(|data: &mut Data| {
-                    data.counter -= 1;
-                    content.set_content(data.counter.to_string());
-                });
-            })
-            .button("Print!", |s| {
-                println!("Thing!");
-            })
-            .button("Quit", |s| {
-                s.pop_layer();
-            }),
-    );
+    let dialog = Dialog::text("Let's get some user data")
+        .content(view)
+        .title("Counter")
+        .button("Up!", move |s| {
+            s.with_user_data(|data: &mut Data| {
+                data.counter += 1;
+                c2.set_content(data.counter.to_string());
+            });
+        })
+        .button("Down!", move |s| {
+            s.with_user_data(|data: &mut Data| {
+                data.counter -= 1;
+                content.set_content(data.counter.to_string());
+            });
+        })
+        .button("Print!", |s| {
+            println!("Thing!");
+        })
+        .button("Quit", |s| {
+            s.pop_layer();
+        });
+    let rs = ResizedView::new(SizeConstraint::Full, SizeConstraint::Full, dialog);
+    siv.add_layer(rs);
 }
 
 fn my_activity(s: &mut Cursive) {
     // s.pop_layer();
-    s.add_layer(
-        Dialog::text("Here's the activity that we're going to do!")
-            .title("Name of my activity")
-            .button("Do the thing!", |s| s.add_layer(Dialog::info("Try again!")))
-            .button("Quit", |s| {
-                s.pop_layer();
-            }),
-    );
+
+    let dialog = Dialog::text("Here's the activity that we're going to do!")
+        .title("Name of my activity")
+        .button("Do the thing!", |s| {
+            s.add_layer(Dialog::info("Did the thing!"))
+        })
+        .button("Quit", |s| {
+            s.pop_layer();
+        });
+    let rs = ResizedView::new(SizeConstraint::Full, SizeConstraint::Full, dialog);
+
+    s.add_layer(rs);
 }
